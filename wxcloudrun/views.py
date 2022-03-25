@@ -4,7 +4,8 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import render
 from wxcloudrun.models import Counters
-
+from wxcloudrun.models import User
+from wxcloudrun.models import History
 
 logger = logging.getLogger('log')
 
@@ -18,6 +19,15 @@ def index(request, _):
 
     return render(request, 'index.html')
 
+def getuser(request, _):
+    rsp = JsonResponse({'code': 0, 'errorMsg': ''}, json_dumps_params={'ensure_ascii': False})
+    try:
+        data = User.objects.get(name="liuwenrui")
+    except User.DoesNotExist:
+        return JsonResponse({'code': 0, 'data': 0},
+                    json_dumps_params={'ensure_ascii': False})
+    return JsonResponse({'code': 0, 'data': data.name},
+                        json_dumps_params={'ensure_ascii': False})
 
 def counter(request, _):
     """

@@ -23,4 +23,7 @@ urlpatterns = (
 
     # 获取主页
     url(r'(/)?$', views.index),
+
+    # 读取用户
+    url('/getuser', views.getuser)
 )
