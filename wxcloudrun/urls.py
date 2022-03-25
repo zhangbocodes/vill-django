@@ -25,5 +25,5 @@ urlpatterns = (
     url(r'(/)?$', views.index),
 
     # 读取用户
-    url('/getuser', views.getuser)
+    url(r'^^api/getuser(/)?$', views.getuser)
 )
