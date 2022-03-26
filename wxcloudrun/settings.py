@@ -17,12 +17,15 @@ SECRET_KEY = 'django-insecure-_&03zc)d*3)w-(0grs-+t-0jjxktn7k%$3y6$9=x_n_ibg4js6
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+CORS_ORIGIN_ALLOW_ALL = True
 ALLOWED_HOSTS = ['*']
 
 # Application definition
-
+secure_ssl_redirect = False
 INSTALLED_APPS = [
+    'sslserver',
+    'werkzeug_debugger_runserver',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -33,6 +36,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,17 +69,31 @@ WSGI_APPLICATION = 'wxcloudrun.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.environ.get("MYSQL_DATABASE", 'django_demo'),
+#         'USER': os.environ.get("MYSQL_USERNAME"),
+#         'HOST': os.environ.get("MYSQL_ADDRESS").split(':')[0],
+#         'PORT': os.environ.get("MYSQL_ADDRESS").split(':')[1],
+#         'PASSWORD': os.environ.get("MYSQL_PASSWORD"),
+#         'OPTIONS': {'charset': 'utf8mb4'},
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get("MYSQL_DATABASE", 'django_demo'),
-        'USER': os.environ.get("MYSQL_USERNAME"),
-        'HOST': os.environ.get("MYSQL_ADDRESS").split(':')[0],
-        'PORT': os.environ.get("MYSQL_ADDRESS").split(':')[1],
-        'PASSWORD': os.environ.get("MYSQL_PASSWORD"),
+        'ENGINE': 'django.db.backends.mysql',    # 数据库引擎
+        'NAME': 'mypro', # 数据库名称
+        'HOST': '127.0.0.1', # 数据库地址，本机 ip 地址 127.0.0.1
+        'PORT': 3306, # 端口
+        'USER': 'root',  # 数据库用户名
+        'PASSWORD': 'LWRzb123', # 数据库密码
         'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

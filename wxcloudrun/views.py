@@ -6,20 +6,12 @@ from django.shortcuts import render
 from wxcloudrun.models import Counters
 from wxcloudrun.models import User
 from wxcloudrun.models import History
+from wxcloudrun.models import Country
 
 logger = logging.getLogger('log')
 
 
-def index(request, _):
-    """
-    获取主页
-
-     `` request `` 请求对象
-    """
-
-    return render(request, 'index.html')
-
-def getuser(request, _):
+def getuser(request):
     rsp = JsonResponse({'code': 0, 'errorMsg': ''}, json_dumps_params={'ensure_ascii': False})
     try:
         data = User.objects.get(name="liuwenrui")
@@ -29,7 +21,52 @@ def getuser(request, _):
     return JsonResponse({'code': 0, 'data': data.name},
                         json_dumps_params={'ensure_ascii': False})
 
-def counter(request, _):
+
+# 新增区域的1个接口
+
+def insertCountry(request):
+    first = request.POST["first"]
+    two = request.POST['two']
+    three = request.POST['three']
+    four = request.POST['four']
+    rsp = JsonResponse({'code': 0, 'errorMsg': '增加成功'},
+                           json_dumps_params={'ensure_ascii': False})
+    if len(first) <=0 or len(two)<=0:
+        rsp = JsonResponse({'code': -1, 'errorMsg': '请填写地域名称'},
+                           json_dumps_params={'ensure_ascii': False})
+        return rsp
+    # object = Country.objects.get(first=first, two=two)
+    # if len(object) >= 1:
+    #     rsp = JsonResponse({'code': 0, 'errorMsg': '该区域已经存在'},
+    #                        json_dumps_params={'ensure_ascii': False})
+    #     return rsp
+    # else:
+    object1 = Country(first = first, two = two, three = three, four = four)
+    try:
+        object1.save()
+    except:
+        return JsonResponse({'code': -1, 'errorMsg': '已经存在，请勿新增'},
+                           json_dumps_params={'ensure_ascii': False})
+
+    return rsp
+
+# 获取区域列表的接口
+# 管理员账号判断的接口， 账号密码判断给我
+def verify(request):
+    name = request.POST["name"]
+    password = request.POST["password"]
+    try:
+        data = User.objects.get(name=name)
+    except:
+        return JsonResponse({'code': 0, 'data': 0},
+                    json_dumps_params={'ensure_ascii': False})
+# 核算记录插入接口
+
+# 判断某人是第几次核酸接口， 根据身份证去查
+
+
+
+def counter(request):
     """
     获取当前计数
 
