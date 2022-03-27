@@ -55,6 +55,9 @@ class History(models.Model):
 
 
      class Meta:
+         indexes = [
+             models.Index(fields=['times'])
+         ]
          unique_together = (
              ('idcard', 'addtime'),
          )

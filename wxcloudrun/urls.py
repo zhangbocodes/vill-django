@@ -28,7 +28,12 @@ from django.urls import path
 # )
 
 urlpatterns = [
-    path('api/count', views.counter),
     path('api/getuser', views.getuser),
-    path('api/insertcountry', views.insertCountry)
+    path('api/insertcountry', views.insertCountry),
+    path('api/verify', views.verify),
+    path('api/inserthistory', views.insertHistory),
+    path('api/gethistory', views.getHistory),
+    path('api/download', views.download),
+    path('api/insertuser', views.insertUser),
+    path('api/shibie',views.shibie)
 ]
