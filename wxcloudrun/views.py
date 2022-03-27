@@ -10,9 +10,9 @@ from wxcloudrun.models import Counters
 from wxcloudrun.models import User
 from wxcloudrun.models import History
 from wxcloudrun.models import Country
-import pandas as pd   # 导入pandas 并重命名 pd
+# import pandas as pd   # 导入pandas 并重命名 pd
 import io
-from aip import AipOcr
+# from aip import AipOcr
 import requests
 import base64
 import urllib3
@@ -140,8 +140,8 @@ def shibie(request):
         resp = requests.post(url=token_url,data={'grant_type':grant_type,'client_id':client_id,'client_secret':client_secret},headers={'Content-Type':'application/x-www-form-urlencoded'})
         resp = resp.json()
         return resp['access_token']
-    image = get_file_content('/Users/didi/Desktop/WechatIMG151.jpeg')
-    image = base64.b64encode(image)
+    # image = get_file_content('/Users/didi/Desktop/WechatIMG151.jpeg')
+    # image = base64.b64encode(image)
     #print(image)
     # image = str(base64.b64decode(image), "utf-8")
     APP_ID = '25850679'
@@ -157,8 +157,18 @@ def shibie(request):
     response = requests.post(request_url, data=params, headers=headers)
     if response:
         print(response.json())
-        return JsonResponse({'code': 0, 'data': response.json()},
-                            json_dumps_params={'ensure_ascii': False})
+        res_json = response.json()
+        if res_json['image_status'] == "normal":
+            name = res_json['words_result']['姓名']['words']
+            idcard = res_json['words_result']['公民身份号码']['words']
+            birth = res_json['words_result']['出生']['words']
+            sex = res_json['words_result']['性别']['words']
+            return_res = {"name":name, "idcard":idcard,"birth":birth,"sex":sex}
+            return JsonResponse({'code': 0, 'data': return_res},
+                                json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({'code': -1, 'errorMsg': "图片错误"},
+                                json_dumps_params={'ensure_ascii': False})
     else:
         return JsonResponse({'code': -1, 'errorMsg':"识别错误"},
                         json_dumps_params={'ensure_ascii': False})
