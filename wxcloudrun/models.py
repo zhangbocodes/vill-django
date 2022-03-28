@@ -24,7 +24,9 @@ class User(models.Model):
 # 1 超级管理员， 2 普通管理员  3 普通人员
     role = models.IntegerField()
     # 区域
-    countryid = models.IntegerField()
+    # countryid = models.IntegerField()
+    # 哪个社区 哪个村的
+    area = models.CharField(max_length = 50)
 
 class Country(models.Model):
      # 一级区域 村、社区
@@ -34,12 +36,10 @@ class Country(models.Model):
     two = models.CharField(max_length = 50)
     # 三级
     three = models.CharField(max_length = 50)
-    # 四级
-    four = models.CharField(max_length = 100)
 
     class Meta:
          unique_together = (
-             ('first', 'two'),
+             ('first', 'two', 'three'),
          )
 
 class History(models.Model):
@@ -51,8 +51,8 @@ class History(models.Model):
      iphone = models.CharField(max_length=20)
      addtime = models.DateField()
      times = models.SmallIntegerField()
+     area = models.CharField(max_length = 200)
      userid = models.IntegerField()
-
 
      class Meta:
          indexes = [

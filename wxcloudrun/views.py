@@ -12,6 +12,8 @@ from wxcloudrun.models import History
 from wxcloudrun.models import Country
 # import pandas as pd   # 导入pandas 并重命名 pd
 import io
+import datetime
+import traceback
 # from aip import AipOcr
 import requests
 import base64
@@ -26,21 +28,30 @@ def getuser(request):
     try:
         data = User.objects.get(name="liuwenrui")
     except User.DoesNotExist:
-        return JsonResponse({'code': 0, 'data': 0},
+        response = JsonResponse({'code': 0, 'data': 0},
                     json_dumps_params={'ensure_ascii': False})
-    return JsonResponse({'code': 0, 'data': data.name},
+        response['Access-Control-Allow-Origin'] = '*'  # 允许的跨域名
+        response['Access-Control-Allow-Headers'] = '*'  # 允许的请求头
+        response['Access-Control-Allow-Method'] = '*'  # 允许的请求方法
+        return response
+    response = JsonResponse({'code': 0, 'data': data.name},
                         json_dumps_params={'ensure_ascii': False})
+    response['Access-Control-Allow-Origin'] = '*'  # 允许的跨域名
+    response['Access-Control-Allow-Headers'] = '*'  # 允许的请求头
+    response['Access-Control-Allow-Method'] = '*'  # 允许的请求方法
+    return response
 
 def insertUser(request):
-    firt = request.POST['first']
+    area = request.POST['area']
     name = request.POST['name']
     password = request.POST['password']
-    object1 = User(name = name,password = password, role = 1, countryid = firt)
+    object1 = User(name = name,password = password, role = 2, area = area)
     rsp = JsonResponse({'code': 0, 'errorMsg': '增加成功'},
                        json_dumps_params={'ensure_ascii': False})
     try:
         object1.save()
-    except:
+    except Exception as e:
+        traceback.print_exc()
         return JsonResponse({'code': -1, 'errorMsg': '已经存在，请勿新增'},
                            json_dumps_params={'ensure_ascii': False})
 
@@ -51,28 +62,54 @@ def insertCountry(request):
     first = request.POST["first"]
     two = request.POST['two']
     three = request.POST['three']
-    four = request.POST['four']
+    # four = request.POST['four']
     rsp = JsonResponse({'code': 0, 'errorMsg': '增加成功'},
                            json_dumps_params={'ensure_ascii': False})
-    if len(first) <=0 or len(two)<=0:
-        rsp = JsonResponse({'code': -1, 'errorMsg': '请填写地域名称'},
-                           json_dumps_params={'ensure_ascii': False})
-        return rsp
     # object = Country.objects.get(first=first, two=two)
     # if len(object) >= 1:
     #     rsp = JsonResponse({'code': 0, 'errorMsg': '该区域已经存在'},
     #                        json_dumps_params={'ensure_ascii': False})
     #     return rsp
     # else:
-    object1 = Country(first = first, two = two, three = three, four = four)
+    object1 = Country(first = first, two = two, three = three)
     try:
         object1.save()
-    except:
+    except Exception as e:
+        traceback.print_exc()
         return JsonResponse({'code': -1, 'errorMsg': '已经存在，请勿新增'},
                            json_dumps_params={'ensure_ascii': False})
 
     return rsp
 
+# 拿所有的从村到小区 到 组的关系
+def getContent(request):
+    pass
+
+
+# 获取村/社区下的所有小区
+def allContent(request):
+    pass
+
+# 根据已有的身份证号获取电话
+def getiphone(request):
+    idcard = request.POST['idcard']
+    sql = "select * from wxcloudrun_history where idcard='%s' limit 1"%(idcard)
+    print(sql)
+    try:
+        ret = History.objects.raw(sql)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({'code': 0, 'data': ''},
+                            json_dumps_params={'ensure_ascii': False})
+
+    if ret:
+        for item in ret:
+            iphone = item.iphone
+        return JsonResponse({'code': 0, 'data': iphone},
+                        json_dumps_params={'ensure_ascii': False})
+    else:
+        return JsonResponse({'code': 0, 'data': ''},
+                            json_dumps_params={'ensure_ascii': False})
 # 获取区域列表的接口
 # 管理员账号判断的接口， 账号密码判断给我
 def verify(request):
@@ -86,26 +123,32 @@ def verify(request):
 
     password1 = data.password
     if password == password1:
-        return JsonResponse({'code': 0, 'data': 0},
+        return JsonResponse({'code': 0, 'data': {"role": data.role, "userid":data.id}},
                            json_dumps_params={'ensure_ascii': False})
     else:
         return JsonResponse({'code': -1, 'errorMsg': '密码不对'},
                             json_dumps_params={'ensure_ascii': False})
 # 核算记录插入接口
 def insertHistory(request):
-    name = request.POST['name']
-    sex = request.POST['sex']
+    name = str(request.POST['name'])
+    sex = str(request.POST['sex'])
     age = request.POST['age']
     birth = request.POST['birth']
+    birth = datetime.datetime.strptime(birth,'%Y-%m-%d')
     idcard = request.POST['idcard']
     iphone = request.POST['iphone']
     addtime = time.strftime("%Y-%m-%d", time.localtime())
-    times = request.POST['times']
-    userid = request.POST['userid']
-    object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, userid = userid)
+    # times = request.POST['times']
+    times = 1
+    # userid = request.POST['userid']
+    userid = 22
+    # area = request.POST["area"]
+    area = "333sdd"
+    object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, area = area,  userid = userid)
     try:
         object.save()
-    except:
+    except Exception as e:
+        traceback.print_exc()
         return JsonResponse({'code': -1, 'errorMsg': '请勿重复新增'},
                            json_dumps_params={'ensure_ascii': False})
     rsp = JsonResponse({'code': 0, 'errorMsg': '增加成功'},
@@ -164,14 +207,26 @@ def shibie(request):
             birth = res_json['words_result']['出生']['words']
             sex = res_json['words_result']['性别']['words']
             return_res = {"name":name, "idcard":idcard,"birth":birth,"sex":sex}
-            return JsonResponse({'code': 0, 'data': return_res},
+            res_json = JsonResponse({'code': 0, 'data': return_res},
                                 json_dumps_params={'ensure_ascii': False})
+            res_json['Access-Control-Allow-Origin'] = '*'  # 允许的跨域名
+            res_json['Access-Control-Allow-Headers'] = '*'  # 允许的请求头
+            res_json['Access-Control-Allow-Method'] = '*'  # 允许的请求方法
+            return  res_json
         else:
-            return JsonResponse({'code': -1, 'errorMsg': "图片错误"},
+            res_json =  JsonResponse({'code': -1, 'errorMsg': "图片错误"},
                                 json_dumps_params={'ensure_ascii': False})
+            res_json['Access-Control-Allow-Origin'] = '*'  # 允许的跨域名
+            res_json['Access-Control-Allow-Headers'] = '*'  # 允许的请求头
+            res_json['Access-Control-Allow-Method'] = '*'  # 允许的请求方法
+            return res_json
     else:
-        return JsonResponse({'code': -1, 'errorMsg':"识别错误"},
+        res_json=JsonResponse({'code': -1, 'errorMsg':"识别错误"},
                         json_dumps_params={'ensure_ascii': False})
+        res_json['Access-Control-Allow-Origin'] = '*'  # 允许的跨域名
+        res_json['Access-Control-Allow-Headers'] = '*'  # 允许的请求头
+        res_json['Access-Control-Allow-Method'] = '*'  # 允许的请求方法
+        return res_json
 # 提供excel 文件下载
 
 def  download(request):
