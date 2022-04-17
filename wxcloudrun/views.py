@@ -408,7 +408,8 @@ def  download(request):
     # 本轮未做核算人数
     not_hesuan_count = len(data_list)
     # 本轮已做核算人数
-
+    not_hesuan_data = None
+    done_cun_data = None
     if len(data_list)>0:
         not_hesuan_data = pd.DataFrame(data_list, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
         # data.to_excel("aa.xlsx", index=False,sheet_name="本轮未做核算")  # index=False 是为了不建立索引
@@ -423,9 +424,16 @@ def  download(request):
     if len(object1) >= 1 :
         done_cun_data = pd.DataFrame(object1, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
         # data.to_excel("aa.xlsx", index=False, sheet_name="本区域本轮已做核算人数")  # index=False 是为了不建立索引
-    with pd.ExcelWriter(download_file) as writer:
-        not_hesuan_data.to_excel(writer, sheet_name='本轮未做核算', index=False)
-        done_cun_data.to_excel(writer, sheet_name='本轮已做核算', index=False)
+    if len(data_list) > 0 and len(object1) > 0:
+        with pd.ExcelWriter(download_file) as writer:
+            not_hesuan_data.to_excel(writer, sheet_name='本轮未做核算', index=False)
+            done_cun_data.to_excel(writer, sheet_name='本轮已做核算', index=False)
+    elif len(data_list) >0 and len(object1) <=0:
+        with pd.ExcelWriter(download_file) as writer:
+            not_hesuan_data.to_excel(writer, sheet_name='本轮未做核算', index=False)
+    elif len(data_list) <=0 and len(object1) >0:
+        with pd.ExcelWriter(download_file) as writer:
+            done_cun_data.to_excel(writer, sheet_name='本轮已做核算', index=False)
     # 这个区域以外本轮在这边已做核算人次
     not_area_count = len(sql2_data_list)
     # 这个区域本来应该做多少人
