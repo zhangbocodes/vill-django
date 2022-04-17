@@ -10,7 +10,8 @@ from wxcloudrun.models import Counters
 from wxcloudrun.models import User
 from wxcloudrun.models import History
 from wxcloudrun.models import Country
-# import pandas as pd   # 导入pandas 并重命名 pd
+from wxcloudrun.models import Alluser
+import pandas as pd   # 导入pandas 并重命名 pd
 import io
 import datetime
 import traceback
@@ -21,6 +22,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger('log')
+FILE_PATH = "/usr/local/nginx/files/"
 
 
 def getuser(request):
@@ -40,13 +42,27 @@ def getuser(request):
     response['Access-Control-Allow-Headers'] = '*'  # 允许的请求头
     response['Access-Control-Allow-Method'] = '*'  # 允许的请求方法
     return response
+def getalluser(request):
+    # sql = "select * from wxcloudrun_user where role = 2"
+    try:
+        data = User.objects.filter(role=2)
+        return_list = []
+        for item in data:
+            temp = [item.name, item.password, item.area]
+            return_list.append(temp)
+        return JsonResponse({'code': 0, 'data': return_list},
+                    json_dumps_params={'ensure_ascii': False})
 
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({'code': 0, 'data': ""},
+                     json_dumps_params={'ensure_ascii': False})
 def insertUser(request):
     area = request.POST['area']
     name = request.POST['name']
     password = request.POST['password']
     object1 = User(name = name,password = password, role = 2, area = area)
-    rsp = JsonResponse({'code': 0, 'errorMsg': '增加成功'},
+    rsp = JsonResponse({'code': 0, 'data': 0},
                        json_dumps_params={'ensure_ascii': False})
     try:
         object1.save()
@@ -81,14 +97,78 @@ def insertCountry(request):
 
     return rsp
 
-# 拿所有的从村到小区 到 组的关系
-def getContent(request):
-    pass
+# 拿所有的从村 或者 社区 到小区 到 组的关系
+def getAllContent(request):
+    # 获取所有的村或者社区
+    response_dict = {}
+    #sql = "select distinct(first) from wxcloudrun_country"
+    try:
+         # ret = Country.objects.raw(sql)
+        ret = Country.objects.values('first').distinct()
+        ret_2 = Country.objects.values('two').distinct()
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({'code': 0, 'data': ""},
+                            json_dumps_params={'ensure_ascii': False})
+    # 获取所有村名 or 社区，并初始化字典
+    return_dict = {}
+    return_zu_dict = {}
+    cun_keys = set()
+    xiaoqu_keys = set()
+    for item in ret:
+        cun = item['first']
+        cun_keys.add(cun)
+    for item in ret_2:
+        xiaoqu_keys.add(item['two'])
+    for item in cun_keys:
+        return_dict[item]=[]
+    for item in xiaoqu_keys:
+        return_zu_dict[item]=[]
+    # 根据小区 获取所有组号
+    for item in ret_2:
+        xiaoqu = item['two']
+        try:
+            object1 = Country.objects.filter(two = xiaoqu)
+            for item in object1:
+                return_zu_dict[xiaoqu].append(item.three)
+            return_zu_dict[xiaoqu] = list(set(return_zu_dict[xiaoqu]))
+        except Exception as e:
+            traceback.print_exc()
+
+    # 根据村名 获取所有的小区
+    for item in ret:
+        cun = item['first']
+        try:
+            object = Country.objects.filter(first = cun )
+            for item in object:
+                return_dict[cun].append(item.two)
+            return_dict[cun] = list(set(return_dict[cun]))
+
+        except Exception as e:
+            traceback.print_exc()
+
+    response_dict["xiaoqu_to_zu"] = return_zu_dict
+    response_dict["cun_to_xiaoqu"] = return_dict
+    return JsonResponse({'code': 0, 'data': response_dict},
+                        json_dumps_params={'ensure_ascii': False})
+
 
 
 # 获取村/社区下的所有小区
-def allContent(request):
-    pass
+def getXiaoqu(request):
+    cun = request.POST['cun']
+    try:
+        object = Country.objects.filter(first= cun)
+        xiaoqu = []
+        for item in object:
+            xiaoqu.append(item.two)
+    except:
+        return JsonResponse({'code': 0, 'data': 0},
+                            json_dumps_params={'ensure_ascii': False})
+    return JsonResponse({'code': 0, 'data': xiaoqu},
+                            json_dumps_params={'ensure_ascii': False})
+
+
 
 # 根据已有的身份证号获取电话
 def getiphone(request):
@@ -139,12 +219,21 @@ def insertHistory(request):
     iphone = request.POST['iphone']
     addtime = time.strftime("%Y-%m-%d", time.localtime())
     # times = request.POST['times']
-    times = 1
-    # userid = request.POST['userid']
-    userid = 22
+    # 轮次
+    times = int(request.POST['times'])
+    # 常住地
+    first = str(request.POST['first'])
+    two = str(request.POST['two'])
+    userid = request.POST['userid']
+    #userid = 22
     # area = request.POST["area"]
-    area = "333sdd"
-    object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, area = area,  userid = userid)
+    # 给alluser 表新增记录
+    object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, area = first, two = two,  userid = userid)
+    object1 = Alluser(idcard = idcard, first= first, two = two)
+    try:
+        object1.save()
+    except Exception as e:
+        traceback.print_exc()
     try:
         object.save()
     except Exception as e:
@@ -227,43 +316,93 @@ def shibie(request):
         res_json['Access-Control-Allow-Headers'] = '*'  # 允许的请求头
         res_json['Access-Control-Allow-Method'] = '*'  # 允许的请求方法
         return res_json
-# 提供excel 文件下载
+# 提供文件下载
 
 def  download(request):
-    diff_times1 = int(request.POST['diff_times1'])
-    diff_times2 = int(request.POST['diff_times2'])
-    # diff_data1 = History.objects.get(times = diff_times1)
-    # diff_data2 = History.objects.get(times = diff_times2)
+    # 输入的轮次
+    times = int(request.POST['times'])
+    # 输入区域
+    cun = request.POST['cun']
+    #download_file = "down.xlsx"
+    download_file = FILE_PATH + "down.xlsx"
+    if times is None:
+        return JsonResponse({'code': -1, 'errorMsg': '请输入轮次'},
+                         json_dumps_params={'ensure_ascii': False})
 
-    sql = 'select * from wxcloudrun_history where times=%d and idcard not in (select idcard from wxcloudrun_history where times = %d)'%(diff_times1, diff_times2)
-    command = 'sh %s/output.sh %d %d'%(os.path.abspath('.'),diff_times1,diff_times2)
-    print(command)
-    val = os.system(command)
-    print(val)
-    return JsonResponse({'code': -1, 'errorMsg': '身份证不合法'},
-                        json_dumps_params={'ensure_ascii': False})
-    # 拼装sql 语句
+    # 本轮所选区域本轮次未做核算人次
+    if cun is None or cun == "全部":
+        sql = "select * from wxcloudrun_alluser where idcard not in(select idcard from wxcloudrun_history where times=%d)" % (
+            times)
+        # 查询本轮应该做多少
+        sql1 = "select * from wxcloudrun_alluser"
+        # 本轮包含外部人员多少？
+        sql2 = "select idcard from wxcloudrun_history where times=%d and area != '%s'" % (times, cun)
+    else:
+        sql = "select * from wxcloudrun_history where first='%s' and idcard not in(select idcard from wxcloudrun_history where times=%d)" % (
+            cun,times)
+        sql1 = "select * from wxcloudrun_alluser where first ='%s'"%(cun)
+        # 本轮包含外部人员多少？
+        sql2 = "select idcard from wxcloudrun_history where times=%d and area != '%s'" % (times, cun)
+    print(sql)
+    data_list = []
+    sql1_data_list = []
+    sql2_data_list = []
+    try:
+        object2 = History.objects.raw(sql)
+        sql1_object = Alluser.objects.raw(sql1)
+        sql2_object = Alluser.objects.raw(sql2)
+        for obj in object2:
+            data = []  # 要在遍历里面创建字典用于存数据
+            print(obj)
+            data.append(obj.name)
+            data.append(obj.sex)
+            data.append(obj.age)
+            data.append(obj.idcard)
+            data.append(obj.iphone)
+            data.append(obj.area)
+            data_list.append(data)
+        for obj in sql1_object:
+            data = []
+            data.append(obj.idcard)
+            data.append(obj.first)
+            sql1_data_list.append(data)
+        for obj in sql2_object:
+            data = []
+            data.append(obj.idcard)
+            sql2_data_list.append(data)
+    except:
+        traceback.print_exc()
 
-    # try:
-    #     ret =History.objects.raw(sql)
-    # except:
-    #     return JsonResponse({'code': -1, 'errorMsg': '下载失败'},
-    #                         json_dumps_params={'ensure_ascii': False})
-    # print(type(ret))
-    # for book in ret:
-    #     print(book.name)
+    # 本轮未做核算人数
+    not_hesuan_count = len(data_list)
+    if len(data_list)>0:
+        not_hesuan_data = pd.DataFrame(data_list, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
+        # data.to_excel("aa.xlsx", index=False,sheet_name="本轮未做核算")  # index=False 是为了不建立索引
+
+    # 这个区域本轮已做核算人数
+    if cun is None or cun == "全部":
+        object1 = History.objects.filter(times=times).values_list("name","sex", "age","idcard","iphone","area")
+    else:
+        object1 = History.objects.filter(times=times, area=cun).values_list("name", "sex", "age", "idcard", "iphone", "area")
+    object1 = list(object1)
+    done_cun_count = len(object1)
+    if len(object1) >= 1 :
+        data = pd.DataFrame(object1, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
+        # data.to_excel("aa.xlsx", index=False, sheet_name="本区域本轮已做核算人数")  # index=False 是为了不建立索引
+    with pd.ExcelWriter(download_file) as writer:
+        not_hesuan_data.to_excel(writer, sheet_name='本轮未做核算', index=False)
+        data.to_excel(writer, sheet_name='本轮已做核算', index=False)
+    # 这个区域以外本轮在这边已做核算人次
+    not_area_count = len(sql2_data_list)
+    # 这个区域本来应该做多少人
+    should_count = len(sql1_data_list)
+    # 这个区域做了多少？
+    area_count = done_cun_count - not_area_count
+
+    return JsonResponse({'code': 0, 'data': {"should_count":should_count,"not_hesuan_count":not_hesuan_count, "done_cun_count":done_cun_count, "not_area_count":not_area_count, "area_count":area_count, "fileurl":download_file}},
+                            json_dumps_params={'ensure_ascii': False})
 
 
-    # if len(ret) >= 1 :
-    #     output = "aa.excel"
-    #     data = pd.DataFrame(ret)
-    #     data.columns(['记录id','姓名', '性别', '年龄', '出生日期', '身份证信息', '手机号', '核算时间', '核算次数', "管理员id"])  # 设置excel表头
-    #     output = io.BytesIO()  # 配置一个BytesIO 这个是为了转二进制流
-    #     data.to_excel(output, index=False)  # index=False 是为了不建立索引
-    #     output.seek(0)  # 把游标归0
-    #     return  output
-    # else:
-    #     return JsonResponse({'code': 0,'errorMsg': '本轮已全部做核算'},
-    #                         json_dumps_params={'ensure_ascii': False})
+
 
 

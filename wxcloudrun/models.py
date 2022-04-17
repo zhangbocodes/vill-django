@@ -51,7 +51,13 @@ class History(models.Model):
      iphone = models.CharField(max_length=20)
      addtime = models.DateField()
      times = models.SmallIntegerField()
+     # 一级地址
      area = models.CharField(max_length = 200)
+
+     # 二级地址
+     two = models.CharField(max_length= 200)
+
+     # 管理员的id
      userid = models.IntegerField()
 
      class Meta:
@@ -61,3 +67,12 @@ class History(models.Model):
          unique_together = (
              ('idcard', 'addtime'),
          )
+
+class Alluser(models.Model):
+    idcard = models.CharField(max_length=50)
+    first = models.CharField(max_length=50)
+    two = models.CharField(max_length=50)
+    class Meta:
+        unique_together = (
+            ('idcard')
+        )
