@@ -386,9 +386,6 @@ def  download(request):
     # sql3_data_list = []
     try:
         object2 = History.objects.raw(sql)
-        sql1_object = Alluser.objects.raw(sql1)
-        sql2_object = History.objects.raw(sql2)
-        # sql3_object = History.objects.raw(sql3)
         for obj in object2:
             data = []  # 要在遍历里面创建字典用于存数据
             print(obj)
@@ -399,15 +396,19 @@ def  download(request):
             data.append(obj.iphone)
             data.append(obj.area)
             data_list.append(data)
+
+        # sql3_object = History.objects.raw(sql3)
+    except:
+        traceback.print_exc()
+    try:
+        sql1_object = Alluser.objects.raw(sql1)
         for obj in sql1_object:
             data = []
             data.append(obj.idcard)
             data.append(obj.first)
             sql1_data_list.append(data)
-        for obj in sql2_object:
-            data = []
-            data.append(obj.idcard)
-            sql2_data_list.append(data)
+    except:
+        traceback.print_exc()
         # for obj in sql3_object:
         #     data = []  # 要在遍历里面创建字典用于存数据
         #     print(obj)
@@ -418,6 +419,12 @@ def  download(request):
         #     data.append(obj.iphone)
         #     data.append(obj.area)
         #     sql3_data_list.append(data)
+    try:
+        sql2_object = History.objects.raw(sql2)
+        for obj in sql2_object:
+            data = []
+            data.append(obj.idcard)
+            sql2_data_list.append(data)
     except:
         traceback.print_exc()
 
