@@ -338,8 +338,10 @@ def  download(request):
     # 输入区域
     cun = request.POST['cun']
     #download_file = "down.xlsx"
-    download_file = FILE_PATH + "down.xlsx"
-    download_url = "http://81.70.239.81/files/down.xlsx"
+    file_name = "down_%d_%s.xlsx"%(times,cun)
+
+    download_file = FILE_PATH + file_name
+    download_url = "http://81.70.239.81/files/"+file_name
     if times is None:
         return JsonResponse({'code': -1, 'errorMsg': '请输入轮次'},
                          json_dumps_params={'ensure_ascii': False})
@@ -427,14 +429,14 @@ def  download(request):
         # data.to_excel("aa.xlsx", index=False, sheet_name="本区域本轮已做核算人数")  # index=False 是为了不建立索引
     if len(data_list) > 0 and len(object1) > 0:
         with pd.ExcelWriter(download_file) as writer:
-            not_hesuan_data.to_excel(writer, sheet_name='本轮未做核算', index=False)
-            done_cun_data.to_excel(writer, sheet_name='本轮已做核算', index=False)
+            not_hesuan_data.to_excel(writer, sheet_name='本轮未做核酸', index=False)
+            done_cun_data.to_excel(writer, sheet_name='本轮已做核酸', index=False)
     elif len(data_list) >0 and len(object1) <=0:
         with pd.ExcelWriter(download_file) as writer:
-            not_hesuan_data.to_excel(writer, sheet_name='本轮未做核算', index=False)
+            not_hesuan_data.to_excel(writer, sheet_name='本轮未做核酸', index=False)
     elif len(data_list) <=0 and len(object1) >0:
         with pd.ExcelWriter(download_file) as writer:
-            done_cun_data.to_excel(writer, sheet_name='本轮已做核算', index=False)
+            done_cun_data.to_excel(writer, sheet_name='本轮已做核酸', index=False)
     # 这个区域以外本轮在这边已做核算人次
     not_area_count = len(sql2_data_list)
     # 这个区域本来应该做多少人
