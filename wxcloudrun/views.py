@@ -339,6 +339,7 @@ def  download(request):
     cun = request.POST['cun']
     #download_file = "down.xlsx"
     download_file = FILE_PATH + "down.xlsx"
+    download_url = "http://81.70.239.81/files/down.xlsx"
     if times is None:
         return JsonResponse({'code': -1, 'errorMsg': '请输入轮次'},
                          json_dumps_params={'ensure_ascii': False})
@@ -441,7 +442,7 @@ def  download(request):
     # 这个区域做了多少？
     area_count = done_cun_count - not_area_count
 
-    return JsonResponse({'code': 0, 'data': {"should_count":should_count,"not_hesuan_count":not_hesuan_count, "done_cun_count":done_cun_count, "not_area_count":not_area_count, "area_count":area_count, "fileurl":download_file}},
+    return JsonResponse({'code': 0, 'data': {"should_count":should_count,"not_hesuan_count":not_hesuan_count, "done_cun_count":done_cun_count, "not_area_count":not_area_count, "area_count":area_count, "fileurl":download_url}},
                             json_dumps_params={'ensure_ascii': False})
 
 
