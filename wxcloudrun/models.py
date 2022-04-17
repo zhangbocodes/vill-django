@@ -65,7 +65,7 @@ class History(models.Model):
              models.Index(fields=['times'])
          ]
          unique_together = (
-             ('idcard', 'addtime'),
+             ('idcard', 'times'),
          )
 
 class Alluser(models.Model):
