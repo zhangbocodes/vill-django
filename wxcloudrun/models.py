@@ -69,10 +69,10 @@ class History(models.Model):
          )
 
 class Alluser(models.Model):
-    idcard = models.CharField(max_length=50)
+    idcard = models.CharField(max_length=50, unique= True)
     first = models.CharField(max_length=50)
     two = models.CharField(max_length=50)
     class Meta:
-        unique_together = (
-            ('idcard')
-        )
+        indexes = [
+            models.Index(fields=['idcard']),
+        ]

@@ -40,4 +40,5 @@ urlpatterns = [
     path('api/getxiaoqu',views.getXiaoqu),
     path('api/getalluser', views.getalluser),
     path('api/getallcontent',views.getAllContent),
+    path('api/getcun', views.getCun),
 ]
