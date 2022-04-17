@@ -369,7 +369,7 @@ def  download(request):
         # 本轮包含外部人员多少？
         sql2 = "select id, idcard from wxcloudrun_history where times=%d and area != '%s'" % (times, cun)
     else:
-        sql = "select * from wxcloudrun_history where area='%s' and idcard not in(select idcard from wxcloudrun_history where times=%d)" % (
+        sql = "select * from wxcloudrun_alluser where area='%s' and idcard not in(select idcard from wxcloudrun_history where times=%d)" % (
             cun,times)
         #查询本轮应该做多少
         sql1 = "select * from wxcloudrun_alluser where first ='%s'"%(cun)

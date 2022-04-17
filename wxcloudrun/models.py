@@ -72,6 +72,11 @@ class Alluser(models.Model):
     idcard = models.CharField(max_length=50, unique= True)
     first = models.CharField(max_length=50)
     two = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+    sex = models.CharField(max_length=5)
+    age = models.SmallIntegerField()
+    birth = models.DateField()
+    iphone = models.CharField(max_length=20)
     class Meta:
         indexes = [
             models.Index(fields=['idcard']),
