@@ -371,12 +371,15 @@ def  download(request):
     else:
         sql = "select * from wxcloudrun_history where first='%s' and idcard not in(select idcard from wxcloudrun_history where times=%d)" % (
             cun,times)
+        #查询本轮应该做多少
         sql1 = "select * from wxcloudrun_alluser where first ='%s'"%(cun)
         # 本轮包含外部人员多少？
         sql2 = "select * from wxcloudrun_history where times=%d and area != '%s'" % (times, cun)
 
         # sql3 = "select * from wxcloudrun_history where times=%d and area ='%s'"%(times,cun)
     print(sql)
+    print(sql1)
+    print(sql2)
     data_list = []
     sql1_data_list = []
     sql2_data_list = []
