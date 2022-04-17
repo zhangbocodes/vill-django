@@ -345,10 +345,14 @@ def  download(request):
 
     # 本轮所选区域本轮次未做核算人次
     if cun is None or cun == "全部":
+        # 本轮未做核算人次
         sql = "select * from wxcloudrun_alluser where idcard not in(select idcard from wxcloudrun_history where times=%d)" % (
             times)
         # 查询本轮应该做多少
         sql1 = "select * from wxcloudrun_alluser"
+        # 本轮已做核算人数
+
+        # sql3 = "select * from wxcloudrun_history where times=%d"%(times)
         # 本轮包含外部人员多少？
         sql2 = "select id, idcard from wxcloudrun_history where times=%d and area != '%s'" % (times, cun)
     else:
@@ -357,14 +361,18 @@ def  download(request):
         sql1 = "select * from wxcloudrun_alluser where first ='%s'"%(cun)
         # 本轮包含外部人员多少？
         sql2 = "select * from wxcloudrun_history where times=%d and area != '%s'" % (times, cun)
+
+        # sql3 = "select * from wxcloudrun_history where times=%d and area ='%s'"%(times,cun)
     print(sql)
     data_list = []
     sql1_data_list = []
     sql2_data_list = []
+    # sql3_data_list = []
     try:
         object2 = History.objects.raw(sql)
         sql1_object = Alluser.objects.raw(sql1)
-        sql2_object = Alluser.objects.raw(sql2)
+        sql2_object = History.objects.raw(sql2)
+        # sql3_object = History.objects.raw(sql3)
         for obj in object2:
             data = []  # 要在遍历里面创建字典用于存数据
             print(obj)
@@ -384,11 +392,23 @@ def  download(request):
             data = []
             data.append(obj.idcard)
             sql2_data_list.append(data)
+        # for obj in sql3_object:
+        #     data = []  # 要在遍历里面创建字典用于存数据
+        #     print(obj)
+        #     data.append(obj.name)
+        #     data.append(obj.sex)
+        #     data.append(obj.age)
+        #     data.append(obj.idcard)
+        #     data.append(obj.iphone)
+        #     data.append(obj.area)
+        #     sql3_data_list.append(data)
     except:
         traceback.print_exc()
 
     # 本轮未做核算人数
     not_hesuan_count = len(data_list)
+    # 本轮已做核算人数
+
     if len(data_list)>0:
         not_hesuan_data = pd.DataFrame(data_list, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
         # data.to_excel("aa.xlsx", index=False,sheet_name="本轮未做核算")  # index=False 是为了不建立索引
@@ -401,11 +421,11 @@ def  download(request):
     object1 = list(object1)
     done_cun_count = len(object1)
     if len(object1) >= 1 :
-        data = pd.DataFrame(object1, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
+        done_cun_data = pd.DataFrame(object1, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
         # data.to_excel("aa.xlsx", index=False, sheet_name="本区域本轮已做核算人数")  # index=False 是为了不建立索引
     with pd.ExcelWriter(download_file) as writer:
         not_hesuan_data.to_excel(writer, sheet_name='本轮未做核算', index=False)
-        data.to_excel(writer, sheet_name='本轮已做核算', index=False)
+        done_cun_data.to_excel(writer, sheet_name='本轮已做核算', index=False)
     # 这个区域以外本轮在这边已做核算人次
     not_area_count = len(sql2_data_list)
     # 这个区域本来应该做多少人
