@@ -347,7 +347,7 @@ def  download(request):
     # 输入区域
     cun = request.POST['cun']
     #download_file = "down.xlsx"
-    file_name = "down_%d_%s.xlsx"%(times,cun)
+    file_name = "down_%d.xlsx"%(times)
 
     download_file = FILE_PATH + file_name
     download_url = "http://81.70.239.81/files/"+file_name
