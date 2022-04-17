@@ -253,7 +253,7 @@ def insertHistory(request):
     # area = request.POST["area"]
     # 给alluser 表新增记录
     object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, area = first, two = two,  userid = userid)
-    object1 = Alluser(idcard = idcard, first= first, two = two)
+    object1 = Alluser(idcard = idcard, first= first, two = two,name=name, sex = sex, age = age,iphone = iphone)
     try:
         object1.save()
     except Exception as e:
