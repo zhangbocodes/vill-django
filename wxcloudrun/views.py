@@ -374,7 +374,7 @@ def  download(request):
         #查询本轮应该做多少
         sql1 = "select * from wxcloudrun_alluser where first ='%s'"%(cun)
         # 本轮包含外部人员多少？
-        sql2 = "select * from wxcloudrun_history where times=%d and area != '%s'" % (times, cun)
+        sql2 = "select * from wxcloudrun_history where times=%d and area != '%s' and idcard in (select idcard from wxcloudrun_alluser where first = '%s')" % (times, cun,cun)
 
         # sql3 = "select * from wxcloudrun_history where times=%d and area ='%s'"%(times,cun)
     print(sql)
@@ -456,7 +456,6 @@ def  download(request):
     should_count = len(sql1_data_list)
     # 这个区域做了多少？
     area_count = done_cun_count - not_area_count
-
     return JsonResponse({'code': 0, 'data': {"should_count":should_count,"not_hesuan_count":not_hesuan_count, "done_cun_count":done_cun_count, "not_area_count":not_area_count, "area_count":area_count, "fileurl":download_url}},
                             json_dumps_params={'ensure_ascii': False})
 
