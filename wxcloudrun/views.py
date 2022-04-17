@@ -17,6 +17,7 @@ import datetime
 import traceback
 # from aip import AipOcr
 import requests
+requests.adapters.DEFAULT_RETRIES = 3
 import base64
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
