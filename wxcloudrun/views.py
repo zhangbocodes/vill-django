@@ -169,6 +169,20 @@ def getXiaoqu(request):
                             json_dumps_params={'ensure_ascii': False})
 
 
+def getCun(request):
+    all_cun = []
+    try:
+
+        ret = Country.objects.values('first').distinct()
+        for item in ret:
+           cun = item['first']
+           all_cun.append(cun)
+    except:
+        return JsonResponse({'code': 0, 'data': 0},
+                            json_dumps_params={'ensure_ascii': False})
+    return JsonResponse({'code': 0, 'data': all_cun},
+                            json_dumps_params={'ensure_ascii': False})
+
 
 # 根据已有的身份证号获取电话
 def getiphone(request):
