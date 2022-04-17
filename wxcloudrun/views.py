@@ -394,7 +394,7 @@ def  download(request):
             data.append(obj.age)
             data.append(obj.idcard)
             data.append(obj.iphone)
-            data.append(obj.fisrt)
+            data.append(obj.first)
             data_list.append(data)
 
         # sql3_object = History.objects.raw(sql3)
