@@ -218,8 +218,9 @@ def verify(request):
 
     password1 = data.password
     area = data.area
+    role = data.role
     if password == password1:
-        if first != area:
+        if first != area and role!=1:
             return JsonResponse({'code': -1, 'errorMsg': '您非本区域管理员'},
                                 json_dumps_params={'ensure_ascii': False})
         else:
