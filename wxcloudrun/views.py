@@ -209,6 +209,7 @@ def getiphone(request):
 def verify(request):
     name = request.POST["name"]
     password = request.POST["password"]
+    first = request.POST['first']
     try:
         data = User.objects.get(name=name)
     except:
@@ -216,12 +217,19 @@ def verify(request):
                     json_dumps_params={'ensure_ascii': False})
 
     password1 = data.password
+    area = data.area
     if password == password1:
-        return JsonResponse({'code': 0, 'data': {"role": data.role, "userid":data.id}},
+        if first != area:
+            return JsonResponse({'code': -1, 'errorMsg': '您非本区域管理员'},
+                                json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({'code': 0, 'data': {"role": data.role, "userid":data.id}},
                            json_dumps_params={'ensure_ascii': False})
     else:
         return JsonResponse({'code': -1, 'errorMsg': '密码不对'},
                             json_dumps_params={'ensure_ascii': False})
+
+
 # 核算记录插入接口
 def insertHistory(request):
     name = str(request.POST['name'])
