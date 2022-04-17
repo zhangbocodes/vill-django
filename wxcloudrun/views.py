@@ -385,7 +385,7 @@ def  download(request):
     sql2_data_list = []
     # sql3_data_list = []
     try:
-        object2 = History.objects.raw(sql)
+        object2 = Alluser.objects.raw(sql)
         for obj in object2:
             data = []  # 要在遍历里面创建字典用于存数据
             print(obj)
