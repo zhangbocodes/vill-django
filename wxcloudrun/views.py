@@ -81,7 +81,7 @@ def delUser(request):
     try:
        delUser = User.objects.get(name=name)
        delUser.delete()
-       rsp = JsonResponse({'code': 0, 'data': ''},
+       return JsonResponse({'code': 0, 'data': ''},
                           json_dumps_params={'ensure_ascii': False})
 
     except:
