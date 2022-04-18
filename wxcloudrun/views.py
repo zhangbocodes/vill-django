@@ -464,7 +464,7 @@ def  download(request):
     not_hesuan_data = None
     done_cun_data = None
     if len(data_list)>0:
-        not_hesuan_data = pd.DataFrame(data_list, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
+        not_hesuan_data = pd.DataFrame(data_list, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域","二级区域", "详细地址"])
         # data.to_excel("aa.xlsx", index=False,sheet_name="本轮未做核算")  # index=False 是为了不建立索引
 
     # 这个区域本轮已做核算人数
