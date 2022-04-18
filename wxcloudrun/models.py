@@ -57,6 +57,8 @@ class History(models.Model):
      # 二级地址
      two = models.CharField(max_length= 200)
 
+    # 三级详细地址
+     three = models.CharField(max_length=200)
      # 管理员的id
      userid = models.IntegerField()
 
@@ -72,6 +74,7 @@ class Alluser(models.Model):
     idcard = models.CharField(max_length=50, unique= True)
     first = models.CharField(max_length=50)
     two = models.CharField(max_length=50)
+    three = models.CharField(max_length=200)
     name = models.CharField(max_length=50)
     sex = models.CharField(max_length=5)
     age = models.SmallIntegerField()

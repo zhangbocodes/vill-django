@@ -69,10 +69,26 @@ def insertUser(request):
         object1.save()
     except Exception as e:
         traceback.print_exc()
-        return JsonResponse({'code': -1, 'errorMsg': '已经存在，请勿新增'},
+        return JsonResponse({'code': -1, 'errorMsg': '用户名已经存在，请勿新增'},
                            json_dumps_params={'ensure_ascii': False})
 
     return rsp
+
+# 删除管理员
+
+def delUser(request):
+    name = request.POST['name']
+    try:
+       delUser = User.objects.get(name=name)
+       delUser.delete()
+       rsp = JsonResponse({'code': 0, 'data': ''},
+                          json_dumps_params={'ensure_ascii': False})
+
+    except:
+        return JsonResponse({'code': -1, 'errorMsg': '删除失败'},
+                            json_dumps_params={'ensure_ascii': False})
+
+
 # 新增区域的1个接口
 
 def insertCountry(request):
@@ -232,6 +248,17 @@ def verify(request):
                             json_dumps_params={'ensure_ascii': False})
 
 
+# 展现用户的记录
+# def showAlluser(request):
+#     first = request.POST['first']
+#     if first == "全部":
+#
+#
+# # 删除所有用户的测试记录
+# def delAlluser(request):
+#     name = request.POST['name']
+#     idcard = request.POST['idcard']
+
 # 核算记录插入接口
 def insertHistory(request):
     name = str(request.POST['name'])
@@ -248,12 +275,13 @@ def insertHistory(request):
     # 常住地
     first = str(request.POST['first'])
     two = str(request.POST['two'])
+    three = str(request.POST['three'])
     userid = request.POST['userid']
     #userid = 22
     # area = request.POST["area"]
     # 给alluser 表新增记录
-    object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, area = first, two = two,  userid = userid)
-    object1 = Alluser(idcard = idcard, first= first, two = two,name=name, sex = sex, age = age,iphone = iphone)
+    object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, area = first, two = two, three = three, userid = userid)
+    object1 = Alluser(idcard = idcard, first= first, two = two, three=three, name=name, sex = sex, age = age,iphone = iphone)
     try:
         object1.save()
     except Exception as e:
@@ -395,6 +423,8 @@ def  download(request):
             data.append(obj.idcard)
             data.append(obj.iphone)
             data.append(obj.first)
+            data.append(obj.two)
+            data.append(obj.three)
             data_list.append(data)
 
         # sql3_object = History.objects.raw(sql3)
@@ -439,13 +469,13 @@ def  download(request):
 
     # 这个区域本轮已做核算人数
     if cun is None or cun == "全部":
-        object1 = History.objects.filter(times=times).values_list("name","sex", "age","idcard","iphone","area")
+        object1 = History.objects.filter(times=times).values_list("name","sex", "age","idcard","iphone","area","two", "three")
     else:
-        object1 = History.objects.filter(times=times, area=cun).values_list("name", "sex", "age", "idcard", "iphone", "area")
+        object1 = History.objects.filter(times=times, area=cun).values_list("name", "sex", "age", "idcard", "iphone", "area","two", "three")
     object1 = list(object1)
     done_cun_count = len(object1)
     if len(object1) >= 1 :
-        done_cun_data = pd.DataFrame(object1, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域"])
+        done_cun_data = pd.DataFrame(object1, columns=['姓名', '性别', '年龄', '身份证信息', '手机号', "所属区域", "二级区域", "详细地址"])
         # data.to_excel("aa.xlsx", index=False, sheet_name="本区域本轮已做核算人数")  # index=False 是为了不建立索引
     if len(data_list) > 0 and len(object1) > 0:
         with pd.ExcelWriter(download_file) as writer:

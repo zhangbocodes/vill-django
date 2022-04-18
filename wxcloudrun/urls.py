@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/gethistory', views.getHistory),
     path('api/download', views.download),
     path('api/insertuser', views.insertUser),
+    path('api/deluser', views.delUser),
     path('api/shibie',views.shibie),
     path('api/getiphone',views.getiphone),
     path('api/getxiaoqu',views.getXiaoqu),
