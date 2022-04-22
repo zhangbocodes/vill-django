@@ -148,7 +148,7 @@ def getAllContent(request):
             object1 = Country.objects.filter(two = xiaoqu).order_by('id')
             for item in object1:
                 return_zu_dict[xiaoqu].append(item.three)
-            return_zu_dict[xiaoqu] = list(set(return_zu_dict[xiaoqu]))
+            return_zu_dict[xiaoqu] = list(set(return_zu_dict[xiaoqu])).sort()
         except Exception as e:
             traceback.print_exc()
 
