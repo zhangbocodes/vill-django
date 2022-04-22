@@ -156,10 +156,10 @@ def getAllContent(request):
     for item in ret:
         cun = item['first']
         try:
-            object = Country.objects.filter(first = cun )
+            object = Country.objects.filter(first = cun ).order_by('id')
             for item in object:
                 return_dict[cun].append(item.two)
-            return_dict[cun] = list(set(return_dict[cun]))
+            return_dict[cun] = list(set(return_dict[cun])).sort()
 
         except Exception as e:
             traceback.print_exc()
