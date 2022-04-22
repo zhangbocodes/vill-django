@@ -42,4 +42,5 @@ urlpatterns = [
     path('api/getalluser', views.getalluser),
     path('api/getallcontent',views.getAllContent),
     path('api/getcun', views.getCun),
+    path('api/getarea',views.getarea),
 ]

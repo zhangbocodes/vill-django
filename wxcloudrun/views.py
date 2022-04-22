@@ -145,7 +145,7 @@ def getAllContent(request):
     for item in ret_2:
         xiaoqu = item['two']
         try:
-            object1 = Country.objects.filter(two = xiaoqu).order_by(Country.id)
+            object1 = Country.objects.filter(two = xiaoqu).order_by('id')
             for item in object1:
                 return_zu_dict[xiaoqu].append(item.three)
             return_zu_dict[xiaoqu] = list(set(return_zu_dict[xiaoqu]))
@@ -200,6 +200,18 @@ def getCun(request):
     return JsonResponse({'code': 0, 'data': all_cun},
                             json_dumps_params={'ensure_ascii': False})
 
+# 根据管理员name 获取区域
+
+def getarea(request):
+    name = request.POST['name']
+    try:
+        ret = User.objects.get(name=name)
+        area = ret.area
+        return JsonResponse({'code': 0, 'data': area},
+                            json_dumps_params={'ensure_ascii': False})
+    except:
+        return JsonResponse({'code': -1, 'errorMsg': "获取管理员区域失败"},
+                            json_dumps_params={'ensure_ascii': False})
 
 # 根据已有的身份证号获取电话
 def getiphone(request):
@@ -282,10 +294,12 @@ def insertHistory(request):
     # 给alluser 表新增记录
     object = History(name=name, sex = sex, age = age, birth = birth, idcard = idcard, iphone = iphone, addtime = addtime, times = times, area = first, two = two, three = three, userid = userid)
     object1 = Alluser(idcard = idcard, first= first, two = two, three=three, name=name, sex = sex, age = age,iphone = iphone)
+    # 新增不成功，就更新地址信息
     try:
         object1.save()
     except Exception as e:
-        traceback.print_exc()
+        temp_object= Alluser.objects.filter(idcard = idcard)
+        temp_object.update(first = first, two=two, three = three)
     try:
         object.save()
     except Exception as e:
