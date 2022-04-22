@@ -160,6 +160,7 @@ def getAllContent(request):
             for item in object:
                 return_dict[cun].append(item.two)
             return_dict[cun] = list(set(return_dict[cun]))
+            return_dict[cun].sort()
 
         except Exception as e:
             traceback.print_exc()
