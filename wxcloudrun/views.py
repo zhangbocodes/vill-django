@@ -161,10 +161,10 @@ def getAllContent(request):
                 return_dict[cun].append(item.two)
             return_dict[cun] = list(set(return_dict[cun]))
             return_dict[cun].sort()
-
+            print(return_dict[cun])
         except Exception as e:
             traceback.print_exc()
-
+    print(return_dict)
     response_dict["xiaoqu_to_zu"] = return_zu_dict
     response_dict["cun_to_xiaoqu"] = return_dict
     return JsonResponse({'code': 0, 'data': response_dict},
