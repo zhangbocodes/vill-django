@@ -159,7 +159,7 @@ def getAllContent(request):
             object = Country.objects.filter(first = cun )
             for item in object:
                 return_dict[cun].append(item.two)
-            return_dict[cun] = list(set(return_dict[cun])).sort()
+            return_dict[cun] = list(set(return_dict[cun]))
 
         except Exception as e:
             traceback.print_exc()
