@@ -156,7 +156,9 @@ def getAllContent(request):
     for item in ret:
         cun = item['first']
         try:
-            object = Country.objects.filter(first = cun ).order_by("id")
+            # object = Country.objects.filter(first = cun ).order_by(['id'])
+            order_sql = "select * from wxcloudrun_country where first = '%s' order by id"%(cun)
+            object = Country.objects.raw(order_sql)
             for item in object:
                 return_dict[cun].append(item.two)
             return_dict[cun] = list(set(return_dict[cun]))
