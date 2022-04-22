@@ -145,10 +145,10 @@ def getAllContent(request):
     for item in ret_2:
         xiaoqu = item['two']
         try:
-            object1 = Country.objects.filter(two = xiaoqu).order_by('id')
+            object1 = Country.objects.filter(two = xiaoqu)
             for item in object1:
                 return_zu_dict[xiaoqu].append(item.three)
-            return_zu_dict[xiaoqu] = list(set(return_zu_dict[xiaoqu])).sort()
+            return_zu_dict[xiaoqu] = list(set(return_zu_dict[xiaoqu]))
         except Exception as e:
             traceback.print_exc()
 
@@ -156,7 +156,7 @@ def getAllContent(request):
     for item in ret:
         cun = item['first']
         try:
-            object = Country.objects.filter(first = cun ).order_by('id')
+            object = Country.objects.filter(first = cun )
             for item in object:
                 return_dict[cun].append(item.two)
             return_dict[cun] = list(set(return_dict[cun])).sort()
